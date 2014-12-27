@@ -35,3 +35,36 @@ func Test_End_Kills_Goroutines(t *testing.T) {
 	}
 
 }
+
+func Test_Returns_Output(t *testing.T) {
+
+	p := NewPool(1)
+	
+	task := TestTask{"Iain"}
+	
+	p.Do(task)
+	p.End()
+	
+	value := <-p.Output
+	
+	if expected, actual := "Iain", value.Value(); expected != actual {
+		t.Errorf("expected %v  but got %v ", expected, actual)
+	}
+	
+}
+
+type TestTask struct {
+	Name string
+}
+
+func (tt TestTask) Execute() OutputValue {
+	return TestOutput{tt.Name}
+}
+
+type TestOutput struct {
+	Name string
+}
+func (to TestOutput) Value() interface {} {
+	
+	return to.Name
+}
