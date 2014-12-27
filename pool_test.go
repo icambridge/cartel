@@ -50,7 +50,27 @@ func Test_Returns_Output(t *testing.T) {
 	if expected, actual := "Iain", value.Value(); expected != actual {
 		t.Errorf("expected %v  but got %v ", expected, actual)
 	}
+}
+
+
+func Test_GetOutput(t *testing.T) {
 	
+	p := NewPool(1)
+	
+	task := TestTask{"Iain"}
+
+	p.Do(task)
+	p.End()
+
+	outputs := p.GetOutput()
+	value := outputs[0]
+	if expected, actual := "Iain", value.Value(); expected != actual {
+		t.Errorf("expected %v  but got %v ", expected, actual)
+	}
+}
+
+type TestReceiver struct {
+	Output string
 }
 
 type TestTask struct {
@@ -64,7 +84,7 @@ func (tt TestTask) Execute() OutputValue {
 type TestOutput struct {
 	Name string
 }
+
 func (to TestOutput) Value() interface {} {
-	
 	return to.Name
 }

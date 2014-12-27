@@ -18,6 +18,22 @@ func (p Pool) Do(t Task) {
 	p.Input <- t
 }
 
+func (p Pool) GetOutput() []OutputValue {
+	values := []OutputValue{}
+	for {
+		select {
+		case r, ok := <-p.Output:
+			if ok {
+				values = append(values, r)
+			} else {
+				return values
+			}
+		default:
+			return values
+		}
+	}
+}
+
 func (p Pool) worker() {
 
 	for {
