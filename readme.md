@@ -28,10 +28,11 @@ Create your own output
 
 ```go
 type MockOutput struct {
+    Name string
 }
 
 func (mo MockOutput) Value() interface{} {
-    return nil
+    return mo.Name
 }
 ```
 
@@ -40,10 +41,11 @@ Create your own Task
 
 ```go
 type MockTask struct {
+    Name string
 }
 
-func (mf MockTask) Execute() cartel.OutputValue {
-    return 
+func (mt MockTask) Execute() cartel.OutputValue {
+    return MockOutput{mt.Name}
 }
 ```
 
