@@ -1,6 +1,6 @@
 Cartel
 ======
-[![Build Status](https://travis-ci.org/icambridge/cartel.svg)](https://travis-ci.org/icambridge/cartel)
+[![Build Status](https://travis-ci.org/icambridge/cartel.svg)](https://travis-ci.org/icambridge/cartel)[![Coverage Status](https://img.shields.io/coveralls/icambridge/cartel.svg)](https://coveralls.io/r/icambridge/cartel)
 
 A task process pool to allow for the easy creation of a pool of workers.
 
