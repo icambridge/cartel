@@ -6,18 +6,18 @@ import (
 )
 
 func Test_Create_Starts_Correct_Number_Of_Goroutines(t *testing.T) {
-	
+
 	startNumber := runtime.NumGoroutine()
 	numberOfWorkers := 5
-	
+
 	NewPool(numberOfWorkers)
-	
+
 	actualNumber := runtime.NumGoroutine()
-	expectedNumber := startNumber+numberOfWorkers
-	
+	expectedNumber := startNumber + numberOfWorkers
+
 	if actualNumber != expectedNumber {
 		t.Errorf("expected %v goroutines but got %v goroutines", expectedNumber, actualNumber)
-		
+
 	}
 }
 
@@ -39,24 +39,23 @@ func Test_End_Kills_Goroutines(t *testing.T) {
 func Test_Returns_Output(t *testing.T) {
 
 	p := NewPool(1)
-	
+
 	task := TestTask{"Iain"}
-	
+
 	p.Do(task)
 	p.End()
-	
+
 	value := <-p.Output
-	
+
 	if expected, actual := "Iain", value.Value(); expected != actual {
 		t.Errorf("expected %v  but got %v ", expected, actual)
 	}
 }
 
-
 func Test_GetOutput(t *testing.T) {
-	
+
 	p := NewPool(1)
-	
+
 	task := TestTask{"Iain"}
 
 	p.Do(task)
@@ -85,6 +84,6 @@ type TestOutput struct {
 	Name string
 }
 
-func (to TestOutput) Value() interface {} {
+func (to TestOutput) Value() interface{} {
 	return to.Name
 }

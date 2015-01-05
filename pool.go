@@ -3,10 +3,11 @@ package cartel
 import (
 	"sync"
 )
+
 type Pool struct {
-	Input chan Task
+	Input  chan Task
 	Output chan OutputValue
-	wg *sync.WaitGroup
+	wg     *sync.WaitGroup
 }
 
 func (p Pool) End() {
@@ -49,13 +50,12 @@ func (p Pool) worker() {
 
 func NewPool(numberOfWorkers int) Pool {
 
-
 	jobs := make(chan Task, 100)
 	results := make(chan OutputValue, 100)
 
 	var wg sync.WaitGroup
 	p := Pool{jobs, results, &wg}
-	
+
 	for w := 1; w <= numberOfWorkers; w++ {
 		wg.Add(1)
 		go p.worker()
