@@ -2,6 +2,7 @@ package cartel
 
 import (
 	"sync"
+	"time"
 )
 
 type Pool struct {
@@ -36,8 +37,17 @@ func (p Pool) GetOutput() []OutputValue {
 }
 
 func (p Pool) worker() {
-
+	t := time.Now()
 	for {
+
+		since := time.Since(t)
+
+		if since.Minutes() > 5 {
+			p.wg.Done()
+			p.addWorker()
+			break
+		}
+
 		t, ok := <-p.Input
 		if !ok {
 			p.wg.Done()
@@ -46,6 +56,11 @@ func (p Pool) worker() {
 		v := t.Execute()
 		p.Output <- v
 	}
+}
+
+func (p Pool) addWorker() {
+	p.wg.Add(1)
+	go p.worker()
 }
 
 func NewPool(numberOfWorkers int) Pool {
@@ -57,8 +72,7 @@ func NewPool(numberOfWorkers int) Pool {
 	p := Pool{jobs, results, &wg}
 
 	for w := 1; w <= numberOfWorkers; w++ {
-		wg.Add(1)
-		go p.worker()
+		p.addWorker()
 	}
 	return p
 }
