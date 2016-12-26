@@ -1,6 +1,7 @@
 package cartel
 
 import (
+	"runtime"
 	"sync"
 	"time"
 )
@@ -42,7 +43,7 @@ func (p Pool) worker() {
 
 		since := time.Since(t)
 
-		if since.Minutes() > 5 {
+		if since.Minutes() > 2 {
 			p.wg.Done()
 			p.addWorker()
 			break
@@ -55,6 +56,7 @@ func (p Pool) worker() {
 		}
 		v := t.Execute()
 		p.Output <- v
+		runtime.GC()
 	}
 }
 
