@@ -7,13 +7,18 @@ import (
 )
 
 type Pool struct {
-	Input  chan Task
-	Output chan OutputValue
-	wg     *sync.WaitGroup
+	Input   chan Task
+	Output  chan OutputValue
+	wg      *sync.WaitGroup
+	counter int
 }
 
 func (p Pool) NumberOfItemsInQueue() int {
 	return len(p.Input)
+}
+
+func (p Pool) NumberOfWorkers() int {
+	return p.counter
 }
 
 func (p Pool) End() {
@@ -41,13 +46,14 @@ func (p Pool) GetOutput() []OutputValue {
 	}
 }
 
-func (p Pool) worker() {
+func (p *Pool) worker() {
 	t := time.Now()
 	for {
 
 		since := time.Since(t)
 
 		if since.Minutes() > 2 {
+			p.counter--
 			p.wg.Done()
 			p.addWorker()
 			break
@@ -55,8 +61,8 @@ func (p Pool) worker() {
 
 		t, ok := <-p.Input
 		if !ok {
+			p.counter--
 			p.wg.Done()
-			// p.addWorker()
 			break
 		}
 		v := t.Execute()
@@ -65,7 +71,8 @@ func (p Pool) worker() {
 	}
 }
 
-func (p Pool) addWorker() {
+func (p *Pool) addWorker() {
+	p.counter++
 	p.wg.Add(1)
 	go p.worker()
 }
@@ -76,7 +83,8 @@ func NewPool(numberOfWorkers int) Pool {
 	results := make(chan OutputValue, 100)
 
 	var wg sync.WaitGroup
-	p := Pool{jobs, results, &wg}
+	counter := 0
+	p := Pool{jobs, results, &wg, counter}
 
 	for w := 1; w <= numberOfWorkers; w++ {
 		p.addWorker()

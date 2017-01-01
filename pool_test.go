@@ -21,6 +21,20 @@ func Test_Create_Starts_Correct_Number_Of_Goroutines(t *testing.T) {
 	}
 }
 
+func Test_Create_Pool_Has_The_Right_Number_Of_Workers(t *testing.T) {
+
+	numberOfWorkers := 5
+
+	p := NewPool(numberOfWorkers)
+
+	actualNumber := p.NumberOfWorkers()
+
+	if actualNumber != numberOfWorkers {
+		t.Errorf("expected %v workers but got %v workers", numberOfWorkers, actualNumber)
+
+	}
+}
+
 func Test_End_Kills_Goroutines(t *testing.T) {
 
 	startNumber := runtime.NumGoroutine()
