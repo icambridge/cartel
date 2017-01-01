@@ -55,7 +55,7 @@ func (p *Pool) worker() {
 		if since.Minutes() > 2 {
 			p.counter--
 			p.wg.Done()
-			p.addWorker()
+			p.AddWorker()
 			break
 		}
 
@@ -71,7 +71,7 @@ func (p *Pool) worker() {
 	}
 }
 
-func (p *Pool) addWorker() {
+func (p *Pool) AddWorker() {
 	p.counter++
 	p.wg.Add(1)
 	go p.worker()
@@ -87,7 +87,7 @@ func NewPool(numberOfWorkers int) Pool {
 	p := Pool{jobs, results, &wg, counter}
 
 	for w := 1; w <= numberOfWorkers; w++ {
-		p.addWorker()
+		p.AddWorker()
 	}
 	return p
 }
