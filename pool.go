@@ -12,6 +12,10 @@ type Pool struct {
 	wg     *sync.WaitGroup
 }
 
+func (p Pool) NumberOfItemsInQueue() int {
+	return len(p.Input)
+}
+
 func (p Pool) End() {
 	close(p.Input)
 	p.wg.Wait()
@@ -52,6 +56,7 @@ func (p Pool) worker() {
 		t, ok := <-p.Input
 		if !ok {
 			p.wg.Done()
+			// p.addWorker()
 			break
 		}
 		v := t.Execute()
