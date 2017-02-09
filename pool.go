@@ -8,7 +8,7 @@ import (
 
 type Pool struct {
 	Input   chan Task
-	Output  chan OutputValue
+	Output  chan interface{}
 	wg      *sync.WaitGroup
 	counter int
 }
@@ -30,8 +30,8 @@ func (p Pool) Do(t Task) {
 	p.Input <- t
 }
 
-func (p Pool) GetOutput() []OutputValue {
-	values := []OutputValue{}
+func (p Pool) GetOutput() []interface{} {
+	values := []interface{}{}
 	for {
 		select {
 		case r, ok := <-p.Output:
@@ -80,7 +80,7 @@ func (p *Pool) AddWorker() {
 func NewPool(numberOfWorkers int) Pool {
 
 	jobs := make(chan Task, 100)
-	results := make(chan OutputValue, 100)
+	results := make(chan interface{}, 100)
 
 	var wg sync.WaitGroup
 	counter := 0

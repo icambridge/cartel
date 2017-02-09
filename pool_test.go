@@ -61,7 +61,7 @@ func Test_Returns_Output(t *testing.T) {
 
 	value := <-p.Output
 
-	if expected, actual := "Iain", value.Value(); expected != actual {
+	if expected, actual := "Iain", value; expected != actual {
 		t.Errorf("expected %v  but got %v ", expected, actual)
 	}
 }
@@ -77,7 +77,7 @@ func Test_GetOutput(t *testing.T) {
 
 	outputs := p.GetOutput()
 	value := outputs[0]
-	if expected, actual := "Iain", value.Value(); expected != actual {
+	if expected, actual := "Iain", value; expected != actual {
 		t.Errorf("expected %v  but got %v ", expected, actual)
 	}
 }
@@ -90,8 +90,8 @@ type TestTask struct {
 	Name string
 }
 
-func (tt TestTask) Execute() OutputValue {
-	return TestOutput{tt.Name}
+func (tt TestTask) Execute() interface{} {
+	return tt.Name
 }
 
 type TestOutput struct {
