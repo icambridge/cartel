@@ -6,35 +6,38 @@ import (
 	"time"
 )
 
-type Pool struct {
-	Input   chan Task
-	Output  chan interface{}
+type PoolOptions struct {
+	PerDuration int
+	Duration    time.Duration
+	Size        int
+}
+
+type Pool interface {
+	Do(t Task)
+	GetOutput() []interface{}
+	End()
+}
+
+type NoTimeLimitPool struct {
+	input   chan Task
+	output  chan interface{}
 	wg      *sync.WaitGroup
-	counter int
 }
 
-func (p Pool) NumberOfItemsInQueue() int {
-	return len(p.Input)
-}
-
-func (p Pool) NumberOfWorkers() int {
-	return p.counter
-}
-
-func (p Pool) End() {
-	close(p.Input)
+func (p NoTimeLimitPool) End() {
+	close(p.input)
 	p.wg.Wait()
 }
 
-func (p Pool) Do(t Task) {
-	p.Input <- t
+func (p NoTimeLimitPool) Do(t Task) {
+	p.input <- t
 }
 
-func (p Pool) GetOutput() []interface{} {
+func (p NoTimeLimitPool) GetOutput() []interface{} {
 	values := []interface{}{}
 	for {
 		select {
-		case r, ok := <-p.Output:
+		case r, ok := <-p.output:
 			if ok {
 				values = append(values, r)
 			} else {
@@ -46,47 +49,43 @@ func (p Pool) GetOutput() []interface{} {
 	}
 }
 
-func (p *Pool) worker() {
+func (p *NoTimeLimitPool) worker() {
 	t := time.Now()
 	for {
 
 		since := time.Since(t)
 
 		if since.Minutes() > 2 {
-			p.counter--
 			p.wg.Done()
 			p.AddWorker()
 			break
 		}
 
-		t, ok := <-p.Input
+		t, ok := <-p.input
 		if !ok {
-			p.counter--
 			p.wg.Done()
 			break
 		}
 		v := t.Execute()
-		p.Output <- v
+		p.output <- v
 		runtime.GC()
 	}
 }
 
-func (p *Pool) AddWorker() {
-	p.counter++
+func (p *NoTimeLimitPool) AddWorker() {
 	p.wg.Add(1)
 	go p.worker()
 }
 
-func NewPool(numberOfWorkers int) Pool {
+func NewPool(options PoolOptions) Pool {
 
 	jobs := make(chan Task, 100)
 	results := make(chan interface{}, 100)
 
 	var wg sync.WaitGroup
-	counter := 0
-	p := Pool{jobs, results, &wg, counter}
+	p := NoTimeLimitPool{jobs, results, &wg}
 
-	for w := 1; w <= numberOfWorkers; w++ {
+	for w := 1; w <= options.Size; w++ {
 		p.AddWorker()
 	}
 	return p

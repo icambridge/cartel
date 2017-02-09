@@ -3,6 +3,7 @@ package cartel
 import (
 	"runtime"
 	"testing"
+	"time"
 )
 
 func Test_Create_Starts_Correct_Number_Of_Goroutines(t *testing.T) {
@@ -10,8 +11,8 @@ func Test_Create_Starts_Correct_Number_Of_Goroutines(t *testing.T) {
 	startNumber := runtime.NumGoroutine()
 	numberOfWorkers := 5
 
-	NewPool(numberOfWorkers)
-
+	p := NewPool(PoolOptions{Size: numberOfWorkers})
+	defer p.End()
 	actualNumber := runtime.NumGoroutine()
 	expectedNumber := startNumber + numberOfWorkers
 
@@ -21,26 +22,22 @@ func Test_Create_Starts_Correct_Number_Of_Goroutines(t *testing.T) {
 	}
 }
 
-func Test_Create_Pool_Has_The_Right_Number_Of_Workers(t *testing.T) {
-
-	numberOfWorkers := 5
-
-	p := NewPool(numberOfWorkers)
-
-	actualNumber := p.NumberOfWorkers()
-
-	if actualNumber != numberOfWorkers {
-		t.Errorf("expected %v workers but got %v workers", numberOfWorkers, actualNumber)
-
-	}
-}
+//func Test_Time_Limited_Pool_Runs_Correctly(t *testing.T) {
+//
+//	numberOfWorkers := 5
+//
+//	p := NewPool(PoolOptions{Size: numberOfWorkers})
+//
+//
+//		t.Errorf("expected %v workers but got %v workers", numberOfWorkers, 0)
+//}
 
 func Test_End_Kills_Goroutines(t *testing.T) {
 
 	startNumber := runtime.NumGoroutine()
 	numberOfWorkers := 5
 
-	p := NewPool(numberOfWorkers)
+	p := NewPool(PoolOptions{Size: numberOfWorkers})
 	p.End()
 	actualNumber := runtime.NumGoroutine()
 
@@ -52,15 +49,21 @@ func Test_End_Kills_Goroutines(t *testing.T) {
 
 func Test_Returns_Output(t *testing.T) {
 
-	p := NewPool(1)
+	numberOfWorkers := 5
+
+	p := NewPool(PoolOptions{Size: numberOfWorkers})
 
 	task := TestTask{"Iain"}
 
 	p.Do(task)
 	p.End()
 
-	value := <-p.Output
+	values := p.GetOutput()
 
+	if expected, actual := 1, len(values);expected != actual {
+		t.Errorf("expected %v  but got %v ", expected, actual)
+	}
+	value := values[0]
 	if expected, actual := "Iain", value; expected != actual {
 		t.Errorf("expected %v  but got %v ", expected, actual)
 	}
@@ -68,7 +71,9 @@ func Test_Returns_Output(t *testing.T) {
 
 func Test_GetOutput(t *testing.T) {
 
-	p := NewPool(1)
+	numberOfWorkers := 5
+
+	p := NewPool(PoolOptions{Size: numberOfWorkers})
 
 	task := TestTask{"Iain"}
 
@@ -94,10 +99,10 @@ func (tt TestTask) Execute() interface{} {
 	return tt.Name
 }
 
-type TestOutput struct {
+type TestTimeTask struct {
 	Name string
 }
 
-func (to TestOutput) Value() interface{} {
-	return to.Name
+func (ttt TestTimeTask) Execute() interface{} {
+	return time.Now()
 }
