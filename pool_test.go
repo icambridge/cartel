@@ -22,16 +22,6 @@ func Test_Create_Starts_Correct_Number_Of_Goroutines(t *testing.T) {
 	}
 }
 
-//func Test_Time_Limited_Pool_Runs_Correctly(t *testing.T) {
-//
-//	numberOfWorkers := 5
-//
-//	p := NewPool(PoolOptions{Size: numberOfWorkers})
-//
-//
-//		t.Errorf("expected %v workers but got %v workers", numberOfWorkers, 0)
-//}
-
 func Test_End_Kills_Goroutines(t *testing.T) {
 
 	startNumber := runtime.NumGoroutine()

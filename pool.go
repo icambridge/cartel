@@ -13,27 +13,28 @@ type PoolOptions struct {
 }
 
 type Pool interface {
+	AddWorker()
 	Do(t Task)
 	GetOutput() []interface{}
 	End()
 }
 
-type NoTimeLimitPool struct {
+type NonTimeLimitedPool struct {
 	input   chan Task
 	output  chan interface{}
 	wg      *sync.WaitGroup
 }
 
-func (p NoTimeLimitPool) End() {
+func (p NonTimeLimitedPool) End() {
 	close(p.input)
 	p.wg.Wait()
 }
 
-func (p NoTimeLimitPool) Do(t Task) {
+func (p NonTimeLimitedPool) Do(t Task) {
 	p.input <- t
 }
 
-func (p NoTimeLimitPool) GetOutput() []interface{} {
+func (p NonTimeLimitedPool) GetOutput() []interface{} {
 	values := []interface{}{}
 	for {
 		select {
@@ -49,7 +50,7 @@ func (p NoTimeLimitPool) GetOutput() []interface{} {
 	}
 }
 
-func (p *NoTimeLimitPool) worker() {
+func (p *NonTimeLimitedPool) worker() {
 	t := time.Now()
 	for {
 
@@ -72,18 +73,22 @@ func (p *NoTimeLimitPool) worker() {
 	}
 }
 
-func (p *NoTimeLimitPool) AddWorker() {
+func (p *NonTimeLimitedPool) AddWorker() {
 	p.wg.Add(1)
 	go p.worker()
 }
 
 func NewPool(options PoolOptions) Pool {
+	return NewNonTimeLimitedPool(options)
+}
+
+func NewNonTimeLimitedPool(options PoolOptions) NonTimeLimitedPool {
 
 	jobs := make(chan Task, 100)
 	results := make(chan interface{}, 100)
 
 	var wg sync.WaitGroup
-	p := NoTimeLimitPool{jobs, results, &wg}
+	p := NonTimeLimitedPool{jobs, results, &wg}
 
 	for w := 1; w <= options.Size; w++ {
 		p.AddWorker()
