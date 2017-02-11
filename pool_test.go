@@ -3,7 +3,6 @@ package cartel
 import (
 	"runtime"
 	"testing"
-	"time"
 )
 
 func Test_Create_Starts_Correct_Number_Of_Goroutines(t *testing.T) {
@@ -50,7 +49,7 @@ func Test_Returns_Output(t *testing.T) {
 
 	values := p.GetOutput()
 
-	if expected, actual := 1, len(values);expected != actual {
+	if expected, actual := 1, len(values); expected != actual {
 		t.Errorf("expected %v  but got %v ", expected, actual)
 	}
 	value := values[0]
@@ -87,12 +86,4 @@ type TestTask struct {
 
 func (tt TestTask) Execute() interface{} {
 	return tt.Name
-}
-
-type TestTimeTask struct {
-	Name string
-}
-
-func (ttt TestTimeTask) Execute() interface{} {
-	return time.Now()
 }

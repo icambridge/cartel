@@ -20,9 +20,9 @@ type Pool interface {
 }
 
 type NonTimeLimitedPool struct {
-	input   chan Task
-	output  chan interface{}
-	wg      *sync.WaitGroup
+	input  chan Task
+	output chan interface{}
+	wg     *sync.WaitGroup
 }
 
 func (p NonTimeLimitedPool) End() {
@@ -73,12 +73,15 @@ func (p *NonTimeLimitedPool) worker() {
 	}
 }
 
-func (p *NonTimeLimitedPool) AddWorker() {
+func (p NonTimeLimitedPool) AddWorker() {
 	p.wg.Add(1)
 	go p.worker()
 }
 
 func NewPool(options PoolOptions) Pool {
+	if options.Duration != 0 && options.PerDuration != 0 {
+		return NewTimeLimitedPool(options)
+	}
 	return NewNonTimeLimitedPool(options)
 }
 
