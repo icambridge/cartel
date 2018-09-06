@@ -24,18 +24,6 @@ import (
 )
 ```
 
-Create your own output
-
-```go
-type MockOutput struct {
-    Name string
-}
-
-func (mo MockOutput) Value() interface{} {
-    return mo.Name
-}
-```
-
 Create your own Task
 
 
@@ -44,7 +32,7 @@ type MockTask struct {
     Name string
 }
 
-func (mt MockTask) Execute() cartel.OutputValue {
+func (mt MockTask) Execute() interface{} {
     return MockOutput{mt.Name}
 }
 ```
@@ -52,7 +40,7 @@ func (mt MockTask) Execute() cartel.OutputValue {
 Then to use
 
 ```go
-p := cartel.NewPool(1)
+p := cartel.NewPool(cartel.PoolOptions{Size: 1})
 
 task := MockTask{"Iain"}
 
